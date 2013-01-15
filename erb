@@ -1,5 +1,0 @@
-require 'erubis'
-template = File.read("test.erb")
-template = Erubis::Eruby.new(template)
-p = template.result(:host => "ruby")
-puts p

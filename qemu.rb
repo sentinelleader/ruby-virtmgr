@@ -1,5 +1,6 @@
 require 'choice'
-require 'uuid'
+require './Virtmod.rb'
+require 'libvirt'
 Choice.options do
   header ''
   header 'Specific options:'
@@ -37,10 +38,15 @@ if Choice.choices[:action] == 'status'
 puts stat
 
 end
-name = Choice.choices[:domain]
-arch = Choice.choices[:arch]
-mac = %x(openssl rand -hex 6 | sed 's/\(..\)/\1:/g; s/.$//')
-GUEST_DISK = "/var/lib/libvirt/images/#{name}.qcow2"
-`rm -f #{GUEST_DISK} ; qemu-img create -f qcow2 #{GUEST_DISK} 5G`
-uuid = UUID.new
-uuid_vm = uuid.generate
+if Choice.choices[:action] == 'create'
+
+	name = Choice.choices[:domain]
+	arch = Choice.choices[:arch]
+        dom_xml = Virtmod.vm_create_xml(name,arch)
+#puts dump_xml
+puts "Conncting to LibVirt"
+conn = Libvirt::open('qemu:///system')
+dom = conn.define_domain_xml(dom_xml)
+dom.create
+conn.close
+end	

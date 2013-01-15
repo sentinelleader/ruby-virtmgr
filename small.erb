@@ -1,12 +1,11 @@
 <domain type='kvm'>
-  <name><%= name %></name>
-  <uuid><%= uuid_vm %></uuid>
-  <memory><%= ram %></memory>
-  <currentMemory>256</currentMemory>
+  <name><%= vm_name %></name>
+  <uuid><%= vm_uuid %></uuid>
+  <memory><%= vm_ram %></memory>
+  <currentMemory><%= vm_ram %></currentMemory>
   <vcpu>1</vcpu>
   <os>
-    <type arch='<%= arch %>'>hvm</type>
-    <boot dev='hd'/>
+    <type arch='<%= vm_arch %>'>hvm</type>
   </os>
   <features>
     <acpi/>
@@ -20,14 +19,20 @@
   <devices>
     <disk type='file' device='disk'>
       <driver name='qemu' type='qcow2'/>
-      <source file='<%= GUEST_DISK %>'/>
+      <source file='<%= vm_disk %>'/>
       <target dev='vda' bus='virtio'/>
+	<boot order='1'/>
     </disk>
+    <disk type='file' device='cdrom'>
+       <source file='<%= vm_iso %>'/>
+       <target dev='hdb' bus='ide'/>
+       <readonly/>
+	<boot order='2'/>
+     </disk>
     <interface type='bridge'>
-      <mac address='52:54:01:60:3c:95'/>
+      <mac address='<%= vm_mac %>'/>
       <source bridge='virbr0'/>
       <model type='virtio'/>
-      <target dev='rl556'/>
     </interface>
     <serial type='pty'>
       <target port='0'/>
@@ -37,8 +42,5 @@
     </console>
     <input type='mouse' bus='ps2'/>
     <graphics type='vnc' port='-1' autoport='yes' keymap='en-us'/>
-    <video>
-      <model type='cirrus' vram='128' heads='1'/>
-    </video>
   </devices>
 </domain>
