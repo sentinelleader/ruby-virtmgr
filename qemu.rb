@@ -33,9 +33,19 @@ end
 
 if Choice.choices[:action] == 'status'
 
-  stat = %x(virsh list)
+conn = Libvirt::open('qemu:///system')  
+#conn.list_defined_domains.each do |domname|
+ # puts " Domain #{domname}"
+conn.list_domains.each do |domid|
+  dom = conn.lookup_domain_by_id(domid)
+  puts " ##### Active Domains #####"
+  puts " Domain #{dom.name} Running"
+end
+conn.list_defined_domains.each do |domname|
+  puts " ##### InActive Domains #####"
+  puts " Domain #{domname} Stopped"
+end
 
-puts stat
 
 end
 if Choice.choices[:action] == 'create'
@@ -49,4 +59,21 @@ conn = Libvirt::open('qemu:///system')
 dom = conn.define_domain_xml(dom_xml)
 dom.create
 conn.close
+end
+if Choice.choices[:action] == 'delete'
+
+        name = Choice.choices[:domain]
+conn = Libvirt::open('qemu:///system')
+vms = Hash.new
+conn.list_domains.each do |domid|
+        dom = conn.lookup_domain_by_id(domid)
+        vms[dom.name] = dom.xml_desc
+end
+del_xml =  vms["#{name}"]
+
+dom = conn.define_domain_xml(del_xml)
+puts "Stopping Domain #{name} if running ...."
+dom.destroy
+puts "Destroying Domain #{name} permanently"
+dom.undefine
 end	
