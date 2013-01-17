@@ -21,7 +21,7 @@ option :arch do
       short '-r'
       long '--arch=ARCH'
       desc 'Specify the Domain/Name for the VM'
-      valid %w[x86 x86_64]
+      valid %w[i686 x86_64]
     end
 option :help do
       long '--help'
@@ -60,6 +60,9 @@ dom = conn.define_domain_xml(dom_xml)
 dom.create
 conn.close
 end
+
+
+
 if Choice.choices[:action] == 'delete'
 
         name = Choice.choices[:domain]
@@ -69,11 +72,19 @@ conn.list_domains.each do |domid|
         dom = conn.lookup_domain_by_id(domid)
         vms[dom.name] = dom.xml_desc
 end
-del_xml =  vms["#{name}"]
 
+if vms["#{name}"]
+puts "VM is running, so stopping . . . "
+del_xml =  vms["#{name}"]
 dom = conn.define_domain_xml(del_xml)
-puts "Stopping Domain #{name} if running ...."
 dom.destroy
-puts "Destroying Domain #{name} permanently"
 dom.undefine
-end	
+else
+puts "VM is switched off, so deleting . . . "
+conn.list_domains.each do |domname|
+        dom = conn.lookup_domain_by_name(name)
+        vms[dom.name] = dom.xml_desc
+end
+dom.undefine
+end
+end
